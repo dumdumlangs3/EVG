@@ -14,7 +14,9 @@ RUN apt-get update && apt-get install -y \
     libjpeg-dev \
     libfreetype6-dev \
     libonig-dev \
-    libzip-dev && \
+    libzip-dev \
+    nodejs \
+    npm && \
     docker-php-ext-configure gd --with-freetype --with-jpeg && \
     docker-php-ext-install gd pdo pdo_mysql mbstring zip exif pcntl bcmath
 
@@ -26,6 +28,9 @@ COPY . .
 
 # Install PHP dependencies
 RUN composer install --optimize-autoloader --no-dev
+
+# Install Node.js dependencies and build Vite assets
+RUN npm install && npm run build
 
 # Set Apache DocumentRoot to the public directory
 RUN sed -i 's|/var/www/html|/var/www/html/public|g' /etc/apache2/sites-available/000-default.conf
