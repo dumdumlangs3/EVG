@@ -1,42 +1,42 @@
-# Use the official PHP 8.2 image with Apache
+# Use the official PHP image with Apache
 FROM php:8.2-apache
+
+# Install system dependencies
+RUN apt-get update && apt-get install -y \
+    git \
+    unzip \
+    libpq-dev \
+    libzip-dev \
+    zip \
+    curl \
+    && docker-php-ext-install pdo pdo_mysql
+
+# Install Composer
+COPY --from=composer:latest /usr/bin/composer /usr/bin/composer
 
 # Set the working directory
 WORKDIR /var/www/html
 
-# Install dependencies
-RUN apt-get update && \
-    apt-get install -y \
-    git \
-    zip \
-    unzip \
-    curl \
-    libpng-dev \
-    libjpeg-dev \
-    libfreetype6-dev \
-    libonig-dev \
-    libzip-dev \
-    npm && \
-    docker-php-ext-configure gd --with-freetype --with-jpeg && \
-    docker-php-ext-install gd pdo pdo_mysql mbstring zip exif pcntl bcmath
-
-# Install Composer
-COPY --from=composer:latest /usr/bin/composer /usr/local/bin/composer
-
-# Copy the Laravel project
+# Copy the application files
 COPY . .
 
-# Install PHP dependencies
-RUN composer install --optimize-autoloader --no-dev
+# Copy the .env.example to .env
+RUN cp .env.example .env
 
-# Generate the application key
+# Install PHP dependencies
+RUN composer install --no-dev --optimize-autoloader
+
+# Set permissions
+RUN chown -R www-data:www-data /var/www/html \
+    && chmod -R 755 /var/www/html/storage \
+    && chmod -R 755 /var/www/html/bootstrap/cache
+
+# Clear caches and generate application key
+RUN php artisan config:clear
 RUN php artisan key:generate
 
-# Set permissions for storage and bootstrap/cache
-RUN chown -R www-data:www-data /var/www/html/storage /var/www/html/bootstrap/cache
-
-# Expose the default port for Apache
+# Expose port 80
 EXPOSE 80
 
-# Start the Apache server
+# Start Apache server
 CMD ["apache2-foreground"]
