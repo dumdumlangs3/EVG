@@ -43,3 +43,10 @@ EXPOSE 80
 
 # Start Apache server
 CMD ["apache2-foreground"]
+
+# Enable Apache mod_rewrite
+RUN a2enmod rewrite
+
+# Allow .htaccess Overrides
+RUN sed -i 's/AllowOverride None/AllowOverride All/g' /etc/apache2/apache2.conf
+
