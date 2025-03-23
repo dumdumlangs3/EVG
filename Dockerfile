@@ -1,41 +1,39 @@
-# Use the official PHP image with Apache
+# Start with the official PHP 8.2 image with Apache
 FROM php:8.2-apache
+
+# Set the working directory inside the container
+WORKDIR /var/www/html
 
 # Install system dependencies
 RUN apt-get update && apt-get install -y \
     git \
-    unzip \
-    libpq-dev \
-    libzip-dev \
     zip \
+    unzip \
     curl \
-    && docker-php-ext-install pdo pdo_mysql
+    libpng-dev \
+    libjpeg-dev \
+    libfreetype6-dev \
+    libonig-dev \
+    libzip-dev && \
+    docker-php-ext-configure gd --with-freetype --with-jpeg && \
+    docker-php-ext-install gd pdo pdo_mysql mbstring zip exif pcntl bcmath
 
-# Install Composer
-COPY --from=composer:latest /usr/bin/composer /usr/bin/composer
+# Install Composer (PHP package manager)
+COPY --from=composer:latest /usr/bin/composer /usr/local/bin/composer
 
-# Set the working directory
-WORKDIR /var/www/html
-
-# Copy the application files
+# Copy all project files to the container
 COPY . .
 
-# Copy the .env.example to .env
-RUN cp .env.example .env
-
 # Install PHP dependencies
-RUN composer install --no-dev --optimize-autoloader
+RUN composer install --optimize-autoloader --no-dev
 
-# Set permissions
-RUN chown -R www-data:www-data /var/www/html \
-    && chmod -R 755 /var/www/html/storage \
-    && chmod -R 755 /var/www/html/bootstrap/cache
+# Set Apache DocumentRoot to the public directory
+RUN sed -i 's|/var/www/html|/var/www/html/public|g' /etc/apache2/sites-available/000-default.conf
 
-# Clear caches and generate application key
-RUN php artisan config:clear
-RUN php artisan key:generate
+# Set the correct permissions
+RUN chown -R www-data:www-data /var/www/html/storage /var/www/html/bootstrap/cache
 
-# Expose port 80
+# Expose port 80 (default for Apache)
 EXPOSE 80
 
 # Start Apache server
