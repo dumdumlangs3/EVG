@@ -1,0 +1,14 @@
+version: '3.8'
+services:
+  app:
+    build:
+      context: .
+    ports:
+      - "8080:80"
+    volumes:
+      - .:/var/www/html
+    environment:
+      APP_KEY: base64:YOUR_KEY_HERE
+      APP_ENV: local
+      APP_DEBUG: true
+      DB_CONNECTION: null

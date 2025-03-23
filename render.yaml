@@ -1,32 +1,16 @@
-# render.yaml
 services:
-  - name: EVG
-    type: web
-    env: php
+  - type: web
+    name: EVG
+    env: production
     plan: free
-    buildCommand: "composer install && php artisan key:generate && php artisan migrate"
-    startCommand: "php artisan serve --host 0.0.0.0 --port 10000"
+    buildCommand: "composer install --optimize-autoloader --no-dev"
+    startCommand: "apache2-foreground"
     envVars:
-      APP_ENV: "production"
-      APP_DEBUG: "false"
-      APP_KEY: "${APP_KEY}"
-      APP_URL: "https://evg.onrender.com"
-      LOG_CHANNEL: "stack"
-      LOG_LEVEL: "debug"
-      DB_CONNECTION: "mysql"
-      DB_HOST: "${DB_HOST}"
-      DB_PORT: "${DB_PORT}"
-      DB_DATABASE: "${DB_DATABASE}"
-      DB_USERNAME: "${DB_USERNAME}"
-      DB_PASSWORD: "${DB_PASSWORD}"
-    healthCheckPath: "/"
-    autoDeploy: true
-    regions: ["oregon"]  # Adjust based on your preferred region
-
-databases:
-  - name: evg-db
-    plan: free
-    engine: mysql
-    version: 8
-    region: oregon
-
+      - key: APP_KEY
+        sync: false
+      - key: APP_ENV
+        value: production
+      - key: APP_DEBUG
+        value: true
+      - key: DB_CONNECTION
+        value: null
