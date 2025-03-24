@@ -17,9 +17,15 @@ services:
     image: mysql:8.0
     container_name: mysql_db
     environment:
-      MYSQL_ROOT_PASSWORD: root
-      MYSQL_DATABASE: your_database_name
-      MYSQL_USER: root
-      MYSQL_PASSWORD: root
+      MYSQL_ROOT_PASSWORD: ZC1pKBiU2W
+      MYSQL_DATABASE: sql12769213
+      MYSQL_USER: sql12769213
+      MYSQL_PASSWORD: ZC1pKBiU2W
     ports:
       - "3306:3306"
+    networks:
+      - laravel_network
+
+networks:
+  laravel_network:
+    driver: bridge
